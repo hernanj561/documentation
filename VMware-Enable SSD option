@@ -1,0 +1,14 @@
+Check VMware Compatibility Guide for Hitachi G400 (VSP G400) for supported SATP/PSP Plugin
+
+https://www.vmware.com/resources/compatibility/detail.php?deviceCategory=san&productid=39102&deviceCategory=san&details=1&partner=42&keyword=400&isSVA=0&page=1&display_interval=10&sortColumn=Partner&sortOrder=Asc
+
+Unmounting a LUN or detaching a datastore/storage device
+
+http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=2004605
+
+Enabling the SSD option on SSD based disks/LUNS that are not detected by default
+
+http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=2013188
+
+Example of claim rule: 
+[root@esxiHost:~] esxcli storage nmp satp rule add --satp=VMW_SATP_DEFAULT_AA --device naa.60060e80122779005040277900000064 --option "enable_ssd"
