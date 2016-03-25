@@ -27,7 +27,7 @@ CiscoMDS1(config-if)# sho running-config interface port-channel 101
 
 version 6.2(13a)
 
-interface port-channel51
+interface port-channel101
   switchport rate-mode dedicated
 
 CiscoMDS1(config-if)# where
