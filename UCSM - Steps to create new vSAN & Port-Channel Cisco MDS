@@ -1,0 +1,105 @@
+sh feature-set (confirm NPIV is enabled)
+sh flogi database
+sh interface brief (take note of interface, vSan & Status)
+
+Create a New vSan you must first enter config-t, enter into vsan DB, select your interace and name your vSan
+Example
+
+CiscoMDS1# configure terminal 
+Enter configuration commands, one per line.  End with CNTL/Z.
+CiscoMDS1(config)# vsan database 
+CiscoMDS1(config-vsan-db)# vsan 101
+CiscoMDS1(config-vsan-db)# vsan 101 interface fc1/1-4
+CiscoMDS1(config-vsan-db)# vsan 101 name New_FabricA
+CiscoMDS1(config-vsan-db)# vsan 101 interface fc1/1-4
+Traffic on fc1/1 may be impacted. Do you want to continue? (y/n) [n] y
+Traffic on fc1/2 may be impacted. Do you want to continue? (y/n) [n] y
+
+CiscoMDS1(config-vsan-db)exit
+
+Create Port-Channel 101
+CiscoMDS1(config)# interface port-channel 101
+CiscoMDS1(config-if)# show interface brief
+CiscoMDS1(config-if)# sho running-config interface port-channel 101
+
+!Command: show running-config interface port-channel101
+!Time: Fri Jan  8 16:03:08 2016
+
+version 6.2(13a)
+
+interface port-channel51
+  switchport rate-mode dedicated
+
+CiscoMDS1(config-if)# where
+  conf; interface port-channel101      admin@CiscoMDS1
+CiscoMDS1(config-if)# interface fc1/13-14
+CiscoMDS1(config-if)# where
+  conf; interface fc1/13-14      admin@wCiscoMDS1
+CiscoMDS1(config-if)# channel-group 101
+command failed: port not compatible [speed]
+ 
+ ** You can use force option to override the port's parameters 
+ ** (e.g. "channel-group X force")
+
+CiscoMDS1(config-if)# channel-group 101 force 
+fc1/13 fc1/14 added to port-channel 101 and disabled
+please do the same operation on the switch at the other end of the port-channel,
+then do "no shutdown" at both ends to bring it up
+
+CiscoMDS1(config-if)# show running-config interface port-channel 101
+
+!Command: show running-config interface port-channel101
+!Time: Fri Jan  8 16:05:38 2016
+
+version 6.2(13a)
+
+interface port-channel101
+  switchport rate-mode dedicated
+
+CiscoMDS1(config-if)# interface port-channel 101
+CiscoMDS1(config-if)# 
+channel           fcdomain          ipv6              pop               switchport        
+end               fspf              link-state-trap   push              vrrp              
+exit              ip                no                shutdown          where             
+CiscoMDS1(config-if)# 
+channel           fcdomain          ipv6              pop               switchport        
+end               fspf              link-state-trap   push              vrrp              
+exit              ip                no                shutdown          where             
+CiscoMDS1(config-if)# where 
+  conf; interface port-channel101      admin@CiscoMDS1
+CiscoMDS1(config-if)# shut (also bounce interface on UCSM FI)
+CiscoMDS1(config-if)# no shut
+CiscoMDS1(config-if)# show interface brief (review results)
+
+CiscoMDS1(config-if)# where
+  conf; interface port-channel101      admin@wCiscoMDS1
+CiscoMDS1(config-if)# interface fc1/13-14
+CiscoMDS1(config-if)# channel-group 101 force
+fc1/13 fc1/14: already part of port-channel101
+CiscoMDS1(config-if)# sho running-config interface fc1/13-14
+
+!Command: show running-config interface fc1/13-14
+!Time: Fri Jan  8 16:26:01 2016
+
+version 6.2(13a)
+
+interface fc1/13
+  switchport speed auto
+  port-license acquire
+  channel-group 101 force
+  no shutdown
+
+interface fc1/14
+  switchport speed auto
+  port-license acquire
+  channel-group 101 force
+  no shutdown
+
+CiscoMDS1(config-if)# where
+  conf; interface fc1/13-14      admin@CiscoMDS1
+CiscoMDS1(config-if)# interface port-channel 101
+CiscoMDS1(config-if)# channel mode active 
+CiscoMDS1(config-if)# shut
+CiscoMDS1(config-if)# no shut
+CiscoMDS1(config-if)# sho interface brief 
+
